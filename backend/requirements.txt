@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+pandas
+numpy
+scikit-learn
+tensorflow
+yfinance
+requests
+pydantic
+vaderSentiment
+python-dotenv
+transformers
+torch
+PyJWT
+cryptography
