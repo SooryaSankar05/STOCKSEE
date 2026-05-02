@@ -1,17 +1,25 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Sparkles, RefreshCw, ExternalLink, TrendingUp, TrendingDown, Minus, Clock } from "lucide-react";
+import {
+  Sparkles,
+  RefreshCw,
+  ExternalLink,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Clock,
+} from "lucide-react";
 
-const BACKEND = "http://localhost:8000";
+const BACKEND = import.meta.env.VITE_BACKEND_URL;
 const REFRESH_MS = 5 * 60 * 1000;
 
 type Signal = "STRONG BUY" | "BUY" | "HOLD" | "SELL" | "STRONG SELL";
 
 function signalFromScore(score: number): Signal {
-  if (score >  0.4)  return "STRONG BUY";
-  if (score >  0.15) return "BUY";
+  if (score > 0.4) return "STRONG BUY";
+  if (score > 0.15) return "BUY";
   if (score >= -0.15) return "HOLD";
-  if (score >= -0.4)  return "SELL";
+  if (score >= -0.4) return "SELL";
   return "STRONG SELL";
 }
 
@@ -26,23 +34,26 @@ interface SentimentItem {
   signal: Signal;
 }
 
-const SIGNAL_CONFIG: Record<Signal, { cls: string; icon: React.ReactNode; label: string }> = {
+const SIGNAL_CONFIG: Record<
+  Signal,
+  { cls: string; icon: React.ReactNode; label: string }
+> = {
   "STRONG BUY": {
     cls: "signal-strong-buy",
     icon: <TrendingUp className="w-3.5 h-3.5" />,
     label: "STRONG BUY",
   },
-  "BUY": {
+  BUY: {
     cls: "signal-buy",
     icon: <TrendingUp className="w-3.5 h-3.5" />,
     label: "BUY",
   },
-  "HOLD": {
+  HOLD: {
     cls: "signal-hold",
     icon: <Minus className="w-3.5 h-3.5" />,
     label: "HOLD",
   },
-  "SELL": {
+  SELL: {
     cls: "signal-sell",
     icon: <TrendingDown className="w-3.5 h-3.5" />,
     label: "SELL",
@@ -65,14 +76,22 @@ function timeAgo(unixTs: number): string {
 function SignalBadge({ signal }: { signal: Signal }) {
   const cfg = SIGNAL_CONFIG[signal] || SIGNAL_CONFIG["HOLD"];
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${cfg.cls}`}>
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${cfg.cls}`}
+    >
       {cfg.icon}
       {cfg.label}
     </span>
   );
 }
 
-function SentimentCard({ item, index }: { item: SentimentItem; index: number }) {
+function SentimentCard({
+  item,
+  index,
+}: {
+  item: SentimentItem;
+  index: number;
+}) {
   return (
     <motion.a
       href={item.url}
@@ -85,25 +104,37 @@ function SentimentCard({ item, index }: { item: SentimentItem; index: number }) 
       className="card-pro group flex flex-col gap-3 cursor-pointer"
     >
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-semibold text-[hsl(var(--text-primary))] leading-snug
-                      group-hover:text-[hsl(var(--accent))] transition-colors line-clamp-3 flex-1">
+        <p
+          className="text-sm font-semibold text-[hsl(var(--text-primary))] leading-snug
+                      group-hover:text-[hsl(var(--accent))] transition-colors line-clamp-3 flex-1"
+        >
           {item.headline}
         </p>
         <SignalBadge signal={item.signal as Signal} />
       </div>
 
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded
-                         bg-[hsl(var(--surface-1))] text-[hsl(var(--text-muted))]">
+        <span
+          className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded
+                         bg-[hsl(var(--surface-1))] text-[hsl(var(--text-muted))]"
+        >
           {item.source || "Source"}
         </span>
         <div className="flex items-center gap-2">
-          <span className={`text-[9px] font-bold uppercase ${
-            item.score > 0.15 ? "text-[#4CAF50]" :
-            item.score < -0.15 ? "text-[#FF4560]" :
-            "text-[#FFC107]"
-          }`}>
-            {item.score > 0.15 ? "POSITIVE" : item.score < -0.15 ? "NEGATIVE" : "NEUTRAL"}
+          <span
+            className={`text-[9px] font-bold uppercase ${
+              item.score > 0.15
+                ? "text-[#4CAF50]"
+                : item.score < -0.15
+                  ? "text-[#FF4560]"
+                  : "text-[#FFC107]"
+            }`}
+          >
+            {item.score > 0.15
+              ? "POSITIVE"
+              : item.score < -0.15
+                ? "NEGATIVE"
+                : "NEUTRAL"}
           </span>
           <span className="flex items-center gap-0.5 text-[10px] text-[hsl(var(--text-muted))]">
             <Clock className="w-3 h-3" />
@@ -141,13 +172,20 @@ export default function AISentiment({ symbol }: Props) {
     setLoading(true);
     setError(false);
     try {
-      const res = await fetch(`${BACKEND}/api/ai-news/${encodeURIComponent(symbol)}`);
+      const res = await fetch(
+        `${BACKEND}/api/ai-news/${encodeURIComponent(symbol)}`,
+      );
       if (!res.ok) throw new Error();
       const json = await res.json();
       // Handle both array (old) and object (new) response shapes
       if (Array.isArray(json)) {
         const avg = json.reduce((s, i) => s + i.score, 0) / (json.length || 1);
-        setData({ symbol, overall_signal: signalFromScore(avg), confidence: Math.min(Math.round(Math.abs(avg) * 100), 95), articles: json });
+        setData({
+          symbol,
+          overall_signal: signalFromScore(avg),
+          confidence: Math.min(Math.round(Math.abs(avg) * 100), 95),
+          articles: json,
+        });
       } else if (json.articles !== undefined) {
         setData(json as ApiResponse);
       } else {
@@ -172,7 +210,8 @@ export default function AISentiment({ symbol }: Props) {
         <div className="flex items-center gap-3">
           <Sparkles className="w-5 h-5 text-[hsl(var(--accent))]" />
           <h2 className="text-lg font-bold text-[hsl(var(--text-primary))]">
-            AI News Signals — <span className="text-[hsl(var(--accent))]">{symbol}</span>
+            AI News Signals —{" "}
+            <span className="text-[hsl(var(--accent))]">{symbol}</span>
           </h2>
         </div>
         <div className="flex items-center gap-3">
@@ -207,14 +246,20 @@ export default function AISentiment({ symbol }: Props) {
         <div className="card-pro text-center py-10 text-[hsl(var(--text-muted))]">
           <Sparkles className="w-8 h-8 mx-auto mb-3 opacity-30" />
           <p className="text-sm">AI Signals unavailable.</p>
-          <p className="text-xs mt-1">Configure FINNHUB_API_KEY in your backend .env file.</p>
+          <p className="text-xs mt-1">
+            Configure FINNHUB_API_KEY in your backend .env file.
+          </p>
         </div>
       )}
 
       {data && data.articles.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {data.articles.map((item, i) => (
-            <SentimentCard key={`${item.datetime}-${i}`} item={item} index={i} />
+            <SentimentCard
+              key={`${item.datetime}-${i}`}
+              item={item}
+              index={i}
+            />
           ))}
         </div>
       )}

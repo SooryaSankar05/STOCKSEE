@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Newspaper, RefreshCw, ExternalLink } from "lucide-react";
 
-const BACKEND = "http://localhost:8000";
+const BACKEND = import.meta.env.VITE_BACKEND_URL;
 const REFRESH_MS = 5 * 60 * 1000;
 
 interface NewsItem {
@@ -13,7 +13,8 @@ interface NewsItem {
 
 const FALLBACK: NewsItem[] = [
   {
-    headline: "Global markets rally as central banks signal pause in rate hikes",
+    headline:
+      "Global markets rally as central banks signal pause in rate hikes",
     source: "Reuters",
     url: "https://www.reuters.com/markets/",
     datetime: Date.now() / 1000,
@@ -25,7 +26,8 @@ const FALLBACK: NewsItem[] = [
     datetime: Date.now() / 1000 - 3600,
   },
   {
-    headline: "Tech stocks lead S&P 500 higher; Nvidia hits fresh all-time high",
+    headline:
+      "Tech stocks lead S&P 500 higher; Nvidia hits fresh all-time high",
     source: "CNBC",
     url: "https://www.cnbc.com/markets/",
     datetime: Date.now() / 1000 - 7200,
@@ -40,7 +42,7 @@ const FALLBACK: NewsItem[] = [
 
 function formatTime(unixTs: number): string {
   const d = new Date(unixTs * 1000);
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
 export default function MarketNews() {
@@ -91,11 +93,14 @@ export default function MarketNews() {
             disabled={loading}
             className="text-[var(--text-muted)] hover:text-[var(--blue)] transition-colors"
           >
-            <RefreshCw size={14} className={loading ? "animate-spin text-[var(--blue)]" : ""} />
+            <RefreshCw
+              size={14}
+              className={loading ? "animate-spin text-[var(--blue)]" : ""}
+            />
           </button>
         </div>
       </div>
-      
+
       <div className="flex flex-col divide-y divide-[var(--border-1)]">
         {news.map((item, i) => (
           <a
@@ -114,7 +119,10 @@ export default function MarketNews() {
             <span className="text-sm font-medium text-[var(--text-1)] group-hover:text-white transition-colors truncate flex-1">
               {item.headline}
             </span>
-            <ExternalLink size={12} className="text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+            <ExternalLink
+              size={12}
+              className="text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+            />
           </a>
         ))}
       </div>
