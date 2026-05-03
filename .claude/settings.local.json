@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "PowerShell(ls *)",
-      "PowerShell(head *)"
+      "PowerShell(head *)",
+      "Bash(grep -v \"^ui$\")"
     ]
   }
 }
