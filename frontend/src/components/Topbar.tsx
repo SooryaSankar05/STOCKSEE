@@ -126,8 +126,22 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
         </Link>
       </div>
 
-      {/* ─── MIDDLE: live ticker tape (desktop only) ──────────── */}
-      <div className="hidden lg:flex flex-1 overflow-hidden min-w-0 mx-4">
+      {/* ─── LIVE badge (always visible, text hidden on mobile) ── */}
+      <div className="flex items-center shrink-0 lg:pl-1">
+        <div className="flex items-center gap-1.5 pr-3 lg:pr-4 lg:border-r lg:border-border">
+          <span
+            className="w-2 h-2 rounded-full shrink-0 animate-live-glow"
+            style={{ backgroundColor: "#00ff88" }}
+          />
+          <span className="hidden lg:inline text-[10px] font-black tracking-[0.18em] uppercase font-mono"
+            style={{ color: "#00ff88" }}>
+            LIVE
+          </span>
+        </div>
+      </div>
+
+      {/* ─── MIDDLE: ticker tape (desktop only) ───────────────── */}
+      <div className="hidden lg:flex flex-1 overflow-hidden min-w-0">
         <div className="overflow-hidden w-full relative">
           <div className="animate-ticker-scroll flex w-max">
             {tickerItems.map((idx, i) => {

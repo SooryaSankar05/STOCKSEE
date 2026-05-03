@@ -101,6 +101,21 @@
   }
 }
 
+@keyframes live-glow {
+  0%, 100% {
+    box-shadow: 0 0 3px 1px rgba(0, 255, 136, 0.35);
+    opacity: 0.75;
+  }
+  50% {
+    box-shadow: 0 0 10px 3px rgba(0, 255, 136, 0.85);
+    opacity: 1;
+  }
+}
+
+.animate-live-glow {
+  animation: live-glow 1.6s ease-in-out infinite;
+}
+
 @layer components {
   .t-panel {
     background: var(--panel-1);
