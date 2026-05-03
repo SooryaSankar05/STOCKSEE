@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Newspaper, RefreshCw, ExternalLink } from "lucide-react";
+import { apiClient } from "@/lib/apiClient";
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL;
 const REFRESH_MS = 5 * 60 * 1000;
 
 interface NewsItem {
@@ -53,9 +53,7 @@ export default function MarketNews() {
   const fetchNews = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${BACKEND}/api/market-news`);
-      if (!res.ok) throw new Error();
-      const data = await res.json();
+      const data = await apiClient.get<NewsItem[]>("/api/market-news");
       if (Array.isArray(data) && data.length > 0) {
         setNews(data);
         setLastFetch(new Date());

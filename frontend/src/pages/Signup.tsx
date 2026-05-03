@@ -1,19 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Mail, Lock, User as UserIcon, Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import StockSeeLogo from "@/components/StockSeeLogo";
 
-export default function Login() {
+export default function Signup() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, loading: authLoading } = useAuth();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
 
   const redirectTo = useMemo(() => {
     const qs = new URLSearchParams(location.search);
@@ -30,12 +32,19 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: { name },
+        },
+      });
       if (error) throw error;
-      toast.success("Welcome back!");
-      navigate(redirectTo, { replace: true });
+      setDone(true);
+      toast.success("Account created! Check your email to verify.");
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Sign in failed");
+      toast.error(err instanceof Error ? err.message : "Sign up failed");
     } finally {
       setLoading(false);
     }
@@ -52,10 +61,35 @@ export default function Login() {
       if (error) throw error;
       if (data?.url) window.location.assign(data.url);
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Google sign-in failed");
+      toast.error(err instanceof Error ? err.message : "Google sign-up failed");
       setLoading(false);
     }
   };
+
+  if (done) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 py-16">
+        <div className="w-full max-w-md glass-card p-8 text-center">
+          <div className="flex justify-center mb-6">
+            <StockSeeLogo className="text-2xl" />
+          </div>
+          <h1 className="font-heading text-2xl font-bold text-foreground mb-3">
+            Check your email
+          </h1>
+          <p className="text-muted-foreground text-sm mb-6">
+            We sent a verification link to <strong className="text-foreground">{email}</strong>.
+            Click it to activate your account.
+          </p>
+          <Link
+            to="/login"
+            className="inline-block w-full h-11 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity leading-[44px] text-center"
+          >
+            Back to Sign In
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-16">
@@ -66,10 +100,10 @@ export default function Login() {
           </div>
 
           <h1 className="font-heading text-2xl font-bold text-foreground text-center mb-1">
-            Welcome back
+            Create account
           </h1>
           <p className="text-sm text-muted-foreground text-center mb-6">
-            Sign in to your account
+            Track stocks across global markets
           </p>
 
           <button
@@ -94,6 +128,16 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="relative">
+              <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full h-11 rounded-lg bg-secondary pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+            <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="email"
@@ -110,7 +154,7 @@ export default function Login() {
                 type={showPassword ? "text" : "password"}
                 required
                 minLength={6}
-                placeholder="Password"
+                placeholder="Password (min 6 characters)"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full h-11 rounded-lg bg-secondary pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
@@ -129,14 +173,14 @@ export default function Login() {
               className="w-full h-11 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              Sign In
+              Create Account
             </button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Don&apos;t have an account?{" "}
-            <Link to="/signup" className="text-primary font-medium hover:underline">
-              Sign up
+            Already have an account?{" "}
+            <Link to="/login" className="text-primary font-medium hover:underline">
+              Sign in
             </Link>
           </p>
           <p className="text-center text-xs text-muted-foreground mt-3">

@@ -9,8 +9,8 @@ import {
   Minus,
   Clock,
 } from "lucide-react";
+import { apiClient } from "@/lib/apiClient";
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL;
 const REFRESH_MS = 5 * 60 * 1000;
 
 type Signal = "STRONG BUY" | "BUY" | "HOLD" | "SELL" | "STRONG SELL";
@@ -172,12 +172,9 @@ export default function AISentiment({ symbol }: Props) {
     setLoading(true);
     setError(false);
     try {
-      const res = await fetch(
-        `${BACKEND}/api/ai-news/${encodeURIComponent(symbol)}`,
+      const json = await apiClient.get<ApiResponse | SentimentItem[]>(
+        `/api/news/${encodeURIComponent(symbol)}`
       );
-      if (!res.ok) throw new Error();
-      const json = await res.json();
-      // Handle both array (old) and object (new) response shapes
       if (Array.isArray(json)) {
         const avg = json.reduce((s, i) => s + i.score, 0) / (json.length || 1);
         setData({
@@ -186,7 +183,7 @@ export default function AISentiment({ symbol }: Props) {
           confidence: Math.min(Math.round(Math.abs(avg) * 100), 95),
           articles: json,
         });
-      } else if (json.articles !== undefined) {
+      } else if ((json as ApiResponse).articles !== undefined) {
         setData(json as ApiResponse);
       } else {
         setError(true);

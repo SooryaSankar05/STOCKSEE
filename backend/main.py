@@ -8,16 +8,14 @@ from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
 
-# ✅ STRONG FIX: always load .env from project root
-env_path = Path(__file__).resolve().parent.parent / ".env"
-load_dotenv(dotenv_path=env_path)
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 import pandas as pd
 import numpy as np
 import yfinance as yf
 import requests
 
-from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel
@@ -30,7 +28,7 @@ app = FastAPI(title="STOCKSEE AI Platform")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -41,9 +39,6 @@ logger = logging.getLogger(__name__)
 # ─── CONFIG ─────────────────────────────────────────────────
 FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
 
-print("ENV PATH:", env_path)
-print("FINNHUB KEY LOADED:", "YES" if FINNHUB_API_KEY else "NO")
-
 CACHE = {}
 NEWS_CACHE = {}
 CACHE_EXPIRY = timedelta(minutes=10)
@@ -53,77 +48,55 @@ vader = SentimentIntensityAnalyzer()
 sentiment_model = None
 
 # ─── AUTH (SUPABASE JWT) ─────────────────────────────────────
-SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL")
-SUPABASE_JWT_AUD = os.getenv("SUPABASE_JWT_AUD")  # optional; if unset, audience is not enforced
-
-_jwks_cache: Dict[str, Any] = {"jwks": None, "ts": None}
-_jwks_ttl = timedelta(hours=12)
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_JWT_AUD = os.getenv("SUPABASE_JWT_AUD")
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
+import jwt
+from jwt import PyJWKClient
 
-def _get_jwks() -> Dict[str, Any]:
-    if not SUPABASE_URL:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Server auth misconfigured: SUPABASE_URL is not set",
-        )
+_jwk_client: Optional[PyJWKClient] = None
 
-    now = datetime.utcnow()
-    if _jwks_cache["jwks"] and _jwks_cache["ts"] and (now - _jwks_cache["ts"] < _jwks_ttl):
-        return _jwks_cache["jwks"]
 
-    jwks_url = f"{SUPABASE_URL.rstrip('/')}/auth/v1/.well-known/jwks.json"
-    try:
-        res = requests.get(jwks_url, timeout=8)
-        res.raise_for_status()
-        jwks = res.json()
-        if not isinstance(jwks, dict) or "keys" not in jwks:
-            raise ValueError("Invalid JWKS")
-        _jwks_cache["jwks"] = jwks
-        _jwks_cache["ts"] = now
-        return jwks
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Unable to fetch JWKS: {e}",
-        )
+def _get_jwk_client() -> PyJWKClient:
+    global _jwk_client
+    if _jwk_client is None:
+        if not SUPABASE_URL:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Server auth misconfigured: SUPABASE_URL is not set",
+            )
+        jwks_url = f"{SUPABASE_URL.rstrip('/')}/auth/v1/.well-known/jwks.json"
+        _jwk_client = PyJWKClient(jwks_url)
+    return _jwk_client
 
 
 def _verify_supabase_jwt(token: str) -> Dict[str, Any]:
-    import jwt
-    from jwt import PyJWKClient
-
     if not SUPABASE_URL:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Server auth misconfigured: SUPABASE_URL is not set",
         )
 
-    # Use local JWKS caching; PyJWT JWKClient handles key selection by kid.
-    jwks_url = f"{SUPABASE_URL.rstrip('/')}/auth/v1/.well-known/jwks.json"
-    jwk_client = PyJWKClient(jwks_url)
-
-    signing_key = jwk_client.get_signing_key_from_jwt(token).key
-    issuer = f"{SUPABASE_URL.rstrip('/')}/auth/v1"
-
-    options = {
-        "verify_signature": True,
-        "verify_exp": True,
-        "verify_iat": True,
-        "verify_nbf": True,
-        "verify_iss": True,
-        "verify_aud": bool(SUPABASE_JWT_AUD),
-    }
-
     try:
+        client = _get_jwk_client()
+        signing_key = client.get_signing_key_from_jwt(token).key
+        issuer = f"{SUPABASE_URL.rstrip('/')}/auth/v1"
+
         payload = jwt.decode(
             token,
             signing_key,
             algorithms=["RS256"],
             issuer=issuer,
             audience=SUPABASE_JWT_AUD,
-            options=options,
+            options={
+                "verify_signature": True,
+                "verify_exp": True,
+                "verify_iat": True,
+                "verify_iss": True,
+                "verify_aud": bool(SUPABASE_JWT_AUD),
+            },
         )
         return payload
     except jwt.ExpiredSignatureError:
@@ -134,7 +107,11 @@ def _verify_supabase_jwt(token: str) -> Dict[str, Any]:
 
 def require_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme)) -> Dict[str, Any]:
     if not credentials or credentials.scheme.lower() != "bearer" or not credentials.credentials:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing bearer token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing bearer token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return _verify_supabase_jwt(credentials.credentials)
 
 # ─── STARTUP ────────────────────────────────────────────────

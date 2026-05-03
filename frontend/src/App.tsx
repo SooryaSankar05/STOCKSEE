@@ -15,6 +15,7 @@ import StockDetail from "./pages/StockDetail";
 import CryptoDetail from "./pages/CryptoDetail";
 import ETFDetail from "./pages/ETFDetail";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import Watchlist from "./pages/Watchlist";
@@ -25,7 +26,7 @@ import Screener from "./pages/Screener";
 import Settings from "./pages/Settings";
 import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
-import RequireAuth from "@/components/RequireAuth";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -52,13 +53,14 @@ const App = () => (
                 <Route path="/crypto/:symbol" element={<CryptoDetail />} />
                 <Route path="/etf/:symbol" element={<ETFDetail />} />
 
-                <Route element={<RequireAuth />}>
+                <Route element={<ProtectedRoute />}>
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/watchlist" element={<Watchlist />} />
                   <Route path="/portfolio" element={<Portfolio />} />
                 </Route>
               </Route>
               <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="*" element={<NotFound />} />

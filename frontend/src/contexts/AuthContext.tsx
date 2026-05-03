@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from "react";
-import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
+import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
 interface AuthCtx {
@@ -22,46 +22,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    let cancelled = false;
+    let mounted = true;
 
-    const applySession = (s: Session | null) => {
-      if (cancelled) return;
-      setSession(s);
-      setUser(s?.user ?? null);
-      setLoading(false);
-    };
-
-    // 1) Hydrate from persisted storage
-    supabase.auth
-      .getSession()
-      .then(({ data, error }) => {
-        if (error) {
-          applySession(null);
-          return;
-        }
-        applySession(data.session ?? null);
-      })
-      .catch(() => applySession(null));
-
-    // 2) Keep in sync with auth state changes (sign-in, sign-out, token refresh)
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, s: Session | null) => {
-      // Supabase can emit INITIAL_SESSION; treat it as authoritative and end loading.
-      if (event === "INITIAL_SESSION") {
-        applySession(s);
-        return;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, s) => {
+        if (!mounted) return;
+        setSession(s);
+        setUser(s?.user ?? null);
+        setLoading(false);
       }
-
-      setSession(s);
-      setUser(s?.user ?? null);
-
-      // Ensure we never get stuck in loading during transitions.
-      if (loading) setLoading(false);
-    });
+    );
 
     return () => {
-      cancelled = true;
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
@@ -78,9 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [user, session, loading]
   );
 
-  return (
-    <Ctx.Provider value={value}>{children}</Ctx.Provider>
-  );
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
 export const useAuth = () => useContext(Ctx);
