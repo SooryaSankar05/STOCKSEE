@@ -10,11 +10,10 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const run = async () => {
-      // 1) Surface OAuth/magic-link errors early
       const hash = window.location.hash || "";
       if (hash.includes("error=") || hash.includes("error_description=")) {
         toast.error("Authentication failed or was canceled.");
-        navigate("/auth", { replace: true });
+        navigate("/login", { replace: true });
         return;
       }
 
@@ -22,26 +21,23 @@ export default function AuthCallback() {
       const code = qs.get("code");
 
       try {
-        // 2) PKCE OAuth flow returns `code` -> must exchange for session
         if (code) {
           const { error } = await supabase.auth.exchangeCodeForSession(code);
           if (error) throw error;
         } else {
-          // 3) For other flows, ensure we have a session hydrated
-          await supabase.auth.getSession();
+          const { error } = await supabase.auth.getSession().then(({ error }) => ({ error }));
+          if (error) throw error;
         }
 
-        const redirect =
-          sessionStorage.getItem("auth:redirect") ||
-          qs.get("redirect") ||
-          "/";
+        const stored = sessionStorage.getItem("auth:redirect");
         sessionStorage.removeItem("auth:redirect");
+        const destination = stored && stored.startsWith("/") ? stored : "/dashboard";
 
-        toast.success("Successfully logged in!");
-        navigate(redirect.startsWith("/") ? redirect : "/", { replace: true });
-      } catch (err: any) {
-        toast.error(err?.message || "Authentication failed");
-        navigate("/auth", { replace: true });
+        toast.success("Signed in successfully!");
+        navigate(destination, { replace: true });
+      } catch (err: unknown) {
+        toast.error(err instanceof Error ? err.message : "Authentication failed");
+        navigate("/login", { replace: true });
       }
     };
 

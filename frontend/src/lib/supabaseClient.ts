@@ -16,3 +16,6 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, 
     detectSessionInUrl: true,
   },
 });
+
+export const oauthCallbackUrl = (): string =>
+  `${window.location.origin}/auth/callback`;
