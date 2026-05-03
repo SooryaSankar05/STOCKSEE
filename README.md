@@ -42,7 +42,9 @@
 ## ✨ Features
 
 ### 🏠 Dashboard
+
 A comprehensive market command center with everything you need at a glance:
+
 - **Market Overview** — Live indices, top gainers/losers, and sector performance
 - **Trending Stocks** — Real-time momentum picks across NSE, BSE, NASDAQ, NYSE, and more
 - **AI Top Picks** — Machine-learning-driven stock recommendations with confidence scores
@@ -55,6 +57,7 @@ A comprehensive market command center with everything you need at a glance:
 - **Portfolio Insights** — P&L summary, allocation breakdown, and AI-driven portfolio health score
 
 ### 🔍 Analyse — Market Scanner
+
 - Scan **thousands of instruments** across global exchanges and sectors simultaneously
 - Filter by exchange (NSE, BSE, NASDAQ, NYSE, LSE, TSE, HKEX, XETRA, and more)
 - Filter by sector (Technology, Financials, Energy, Healthcare, Consumer, Automotive, Defence, and more)
@@ -62,12 +65,14 @@ A comprehensive market command center with everything you need at a glance:
 - Live price feeds with real-time change percentages
 
 ### ⭐ Watchlist
+
 - Add any stock, ETF, or crypto to your personal watchlist
 - Real-time price updates with percentage change indicators
 - Row-level security — your list is private and user-scoped
 - One-click navigation to full instrument detail pages
 
 ### 💼 Portfolio
+
 - Track holdings across multiple exchanges in one place
 - Automatic **P&L calculation** (unrealised gains/losses)
 - **Sector allocation** breakdown with visual charts
@@ -75,32 +80,38 @@ A comprehensive market command center with everything you need at a glance:
 - Add / edit / remove holdings with buy price and quantity tracking
 
 ### 🔔 Alerts
+
 - Create price alerts: **above / below** threshold
 - Technical signal alerts: **SMA crossover bullish / bearish**
 - Real-time push notifications when conditions are triggered
 - Toggle alerts on/off without deleting them
 
 ### 📰 News Center
+
 - Aggregated financial news from global sources via Finnhub
 - Sentiment-scored headlines (Positive / Neutral / Negative)
 - Filter news by instrument or browse general market news
 - Auto-refreshing feed every 5 minutes
 
 ### 🗺️ Heatmaps
+
 - Interactive sector and market-cap heatmaps
 - Visual performance comparison across global equity markets
 - Colour-coded intensity based on daily percentage moves
 
 ### 🔎 Screener Pro
+
 - Multi-factor stock screener across fundamental and technical criteria
 - Filter by market cap, P/E ratio, volume, RSI, MACD, and more
 - Save screener configurations for repeated use
 
 ### 🎓 Academy
+
 - Curated educational content for investors at every level
 - Articles, glossaries, and guides covering technical analysis, fundamentals, and portfolio management
 
 ### ⚙️ Settings
+
 - **Profile** — Update name, country, and experience level
 - **Appearance** — Toggle dark / light mode
 - **Market Preferences** — Set default exchange and currency
@@ -112,23 +123,23 @@ A comprehensive market command center with everything you need at a glance:
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|---|---|
-| **Frontend Framework** | [React 18](https://react.dev) + [TypeScript 5](https://www.typescriptlang.org) |
-| **Build Tool** | [Vite](https://vitejs.dev) |
-| **Styling** | [Tailwind CSS v3](https://tailwindcss.com) + [shadcn/ui](https://ui.shadcn.com) |
-| **Routing** | [React Router v6](https://reactrouter.com) |
-| **Server State** | [TanStack Query v5](https://tanstack.com/query) |
-| **Animations** | [Framer Motion](https://www.framer.com/motion) |
-| **Backend Framework** | [FastAPI](https://fastapi.tiangolo.com) (Python 3.11+) |
-| **Market Data** | [yfinance](https://github.com/ranaroussi/yfinance), [Finnhub](https://finnhub.io) |
+| Layer                  | Technology                                                                                         |
+| ---------------------- | -------------------------------------------------------------------------------------------------- |
+| **Frontend Framework** | [React 18](https://react.dev) + [TypeScript 5](https://www.typescriptlang.org)                     |
+| **Build Tool**         | [Vite](https://vitejs.dev)                                                                         |
+| **Styling**            | [Tailwind CSS v3](https://tailwindcss.com) + [shadcn/ui](https://ui.shadcn.com)                    |
+| **Routing**            | [React Router v6](https://reactrouter.com)                                                         |
+| **Server State**       | [TanStack Query v5](https://tanstack.com/query)                                                    |
+| **Animations**         | [Framer Motion](https://www.framer.com/motion)                                                     |
+| **Backend Framework**  | [FastAPI](https://fastapi.tiangolo.com) (Python 3.11+)                                             |
+| **Market Data**        | [yfinance](https://github.com/ranaroussi/yfinance), [Finnhub](https://finnhub.io)                  |
 | **Sentiment Analysis** | [VADER](https://github.com/cjhutto/vaderSentiment), [FinBERT](https://github.com/ProsusAI/finbert) |
-| **ML / Forecasting** | [scikit-learn](https://scikit-learn.org), [TensorFlow / Keras](https://www.tensorflow.org) (LSTM) |
-| **Database** | [Supabase](https://supabase.com) (PostgreSQL + Row Level Security) |
-| **Authentication** | [Supabase Auth](https://supabase.com/docs/guides/auth) — Email/Password + Google OAuth (PKCE) |
-| **JWT Validation** | [PyJWT](https://pyjwt.readthedocs.io) + Supabase JWKS (RS256) |
-| **Frontend Deploy** | [Vercel](https://vercel.com) |
-| **Backend Deploy** | [Render](https://render.com) |
+| **ML / Forecasting**   | [scikit-learn](https://scikit-learn.org), [TensorFlow / Keras](https://www.tensorflow.org) (LSTM)  |
+| **Database**           | [Supabase](https://supabase.com) (PostgreSQL + Row Level Security)                                 |
+| **Authentication**     | [Supabase Auth](https://supabase.com/docs/guides/auth) — Email/Password + Google OAuth (PKCE)      |
+| **JWT Validation**     | [PyJWT](https://pyjwt.readthedocs.io) + Supabase JWKS (RS256)                                      |
+| **Frontend Deploy**    | [Vercel](https://vercel.com)                                                                       |
+| **Backend Deploy**     | [Render](https://render.com)                                                                       |
 
 ---
 
@@ -229,21 +240,21 @@ npm run dev
 
 ### Frontend — `frontend/.env`
 
-| Variable | Required | Description |
-|---|---|---|
-| `VITE_SUPABASE_URL` | ✅ | Supabase project URL |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | ✅ | Supabase anon/public API key |
-| `VITE_BACKEND_URL` | ✅ | FastAPI base URL (`http://localhost:8000` locally, Render URL in production) |
+| Variable                        | Required | Description                                                                  |
+| ------------------------------- | -------- | ---------------------------------------------------------------------------- |
+| `VITE_SUPABASE_URL`             | ✅       | Supabase project URL                                                         |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | ✅       | Supabase anon/public API key                                                 |
+| `VITE_BACKEND_URL`              | ✅       | FastAPI base URL (`http://localhost:8000` locally, Render URL in production) |
 
 ### Backend — `backend/.env`
 
-| Variable | Required | Description |
-|---|---|---|
-| `SUPABASE_URL` | ✅ | Supabase project URL — used to fetch JWKS for JWT validation |
-| `SUPABASE_JWT_AUD` | ✅ | JWT audience claim — must be `authenticated` |
-| `FINNHUB_API_KEY` | ✅ | API key from [finnhub.io](https://finnhub.io) for news and company data |
-| `DISABLE_FINBERT` | ⬜ | Set to `1` to skip FinBERT and use VADER (recommended on Render free tier) |
-| `RENDER` | ⬜ | Auto-set by Render.com — also disables FinBERT on cold starts |
+| Variable           | Required | Description                                                                |
+| ------------------ | -------- | -------------------------------------------------------------------------- |
+| `SUPABASE_URL`     | ✅       | Supabase project URL — used to fetch JWKS for JWT validation               |
+| `SUPABASE_JWT_AUD` | ✅       | JWT audience claim — must be `authenticated`                               |
+| `FINNHUB_API_KEY`  | ✅       | API key from [finnhub.io](https://finnhub.io) for news and company data    |
+| `DISABLE_FINBERT`  | ⬜       | Set to `1` to skip FinBERT and use VADER (recommended on Render free tier) |
+| `RENDER`           | ⬜       | Auto-set by Render.com — also disables FinBERT on cold starts              |
 
 ---
 
@@ -456,8 +467,6 @@ SOFTWARE.
 ---
 
 <div align="center">
-
-Built with ❤️ by [Soorya Sankar](https://github.com/your-username)
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit%20StockSee-2563FF?style=for-the-badge&logo=vercel&logoColor=white)](https://stocksee-delta.vercel.app)
 
